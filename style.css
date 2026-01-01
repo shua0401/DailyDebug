@@ -1,0 +1,182 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    /* ここにアップロードした画像を背景として設定 */
+    background: url('image_c68888.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 20, 40, 0.4); /* 海の青さを活かしつつ文字を見やすく */
+    z-index: 1;
+}
+
+.container {
+    position: relative;
+    z-index: 2;
+    width: 90%;
+    max-width: 400px;
+}
+
+h1 {
+    text-align: center;
+    letter-spacing: 4px;
+    font-weight: 800;
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+}
+
+/* ガラスのようなカードデザイン */
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-size: 0.7rem;
+    margin-bottom: 8px;
+    color: #00d4ff;
+    font-weight: bold;
+}
+
+input[type="range"] {
+    width: 80%;
+    vertical-align: middle;
+}
+
+#scoreVal {
+    display: inline-block;
+    margin-left: 10px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #00d4ff;
+}
+
+input[type="text"] {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.5);
+    color: white;
+    padding: 5px 0;
+    outline: none;
+    box-sizing: border-box;
+}
+
+input[type="text"]::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.btn-save {
+    width: 100%;
+    padding: 12px;
+    background: #00d4ff;
+    border: none;
+    border-radius: 10px;
+    color: #001428;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-save:hover {
+    background: white;
+    box-shadow: 0 0 15px #00d4ff;
+}
+
+.chart-container {
+    min-height: 250px;
+}
+
+/* スマホ最適化 */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        max-width: 100%;
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        letter-spacing: 2px;
+    }
+
+    .subtitle {
+        font-size: 0.7rem;
+        margin-bottom: 20px;
+    }
+
+    .glass-card {
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-size: 0.65rem;
+    }
+
+    input[type="text"] {
+        font-size: 1rem;
+    }
+
+    .btn-save {
+        padding: 15px;
+        font-size: 1rem;
+        border-radius: 12px;
+    }
+
+    .chart-container {
+        min-height: 200px;
+    }
+
+    #scoreVal {
+        font-size: 1.5rem;
+    }
+}
+
+/* タッチデバイス用の改善 */
+@media (hover: none) and (pointer: coarse) {
+    .btn-save {
+        padding: 18px;
+        font-size: 1.1rem;
+    }
+
+    input[type="range"] {
+        height: 40px;
+    }
+
+    input[type="text"] {
+        padding: 10px 0;
+        font-size: 1.1rem;
+    }
+}
+

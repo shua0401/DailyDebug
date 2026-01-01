@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#00d4ff">
+    <title>Daily Debug Phase 01</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="container">
+        <header>
+            <h1 class="glitch-text">ACTION: PHASE 01</h1>
+            <p class="subtitle">Palm Jumeirah Optimization</p>
+        </header>
+        
+        <div class="glass-card">
+            <div class="form-group">
+                <label>CORE PROGRESS (0-100)</label>
+                <input type="range" id="score" min="0" max="100" value="80" oninput="updateScoreVal(this.value)">
+                <span id="scoreVal">80</span>
+            </div>
+            
+            <div class="form-group">
+                <label>DEBUG LOG (SHORT)</label>
+                <input type="text" id="note" placeholder="二言以内で記述...">
+            </div>
+            
+            <button class="btn-save" onclick="saveLog()">SEND TO CLOUD</button>
+        </div>
+
+        <div class="glass-card chart-container">
+            <canvas id="growthChart"></canvas>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        // PWA対応 - Service Worker登録
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed'));
+        }
+    </script>
+</body>
+</html>
+
