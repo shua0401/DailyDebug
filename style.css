@@ -273,6 +273,13 @@ textarea:focus {
     background: rgba(0, 212, 255, 0.08);
 }
 
+.cal-day-today {
+    box-shadow:
+        0 0 0 2px rgba(0, 212, 255, 0.9),
+        0 0 14px rgba(0, 212, 255, 0.35);
+    z-index: 1;
+}
+
 .cal-day-num {
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.95);

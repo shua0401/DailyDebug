@@ -1,6 +1,6 @@
 // Google Apps Script Web App URL
 // セットアップ後にここにGASのデプロイURLを貼り付けてください
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwgM8FWABOS9U4Wm3AG2d1AWPIAMZ3MZ7hVOcSWWqMQ7DN_z34GsHixn5zkLAG7tCXg/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbz99H7Gl19QvjcWVoP8VvYaIi-j_4S9TlpUeR2g9IQ-egLXy-nlE6s9thpLDAnehVxU/exec";
 
 const STORAGE_KEY = 'dailyDebugData';
 
@@ -159,6 +159,12 @@ function dateKeyFromParts(y, m1, d) {
     return `${y}/${m1}/${d}`;
 }
 
+/** 今日（端末のローカル日付）をカレンダーと同じキー形式に */
+function getTodayDateKey() {
+    const n = new Date();
+    return dateKeyFromParts(n.getFullYear(), n.getMonth() + 1, n.getDate());
+}
+
 function normalizeDateKey(dateVal) {
     if (dateVal == null || dateVal === '') return '';
     if (dateVal instanceof Date) {
@@ -169,10 +175,27 @@ function normalizeDateKey(dateVal) {
         );
     }
     const s = String(dateVal).trim();
-    if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
-        const [y, mo, da] = s.split('T')[0].split('-');
-        return dateKeyFromParts(parseInt(y, 10), parseInt(mo, 10), parseInt(da, 10));
+
+    // GAS 等が Date を JSON 化したときは "2026-04-06T15:00:00.000Z" のようになり、
+    // 日付部分だけ切り出すとタイムゾーンずれで前日になる。必ずローカル日付に変換する。
+    if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+        const dt = new Date(s);
+        if (!Number.isNaN(dt.getTime())) {
+            return dateKeyFromParts(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
+        }
     }
+
+    // 時刻なしの YYYY-MM-DD はカレンダーの日付そのものとして扱う（UTC 解釈でずれないように）
+    const head = s.split('T')[0];
+    const isoDateOnly = head.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (isoDateOnly) {
+        return dateKeyFromParts(
+            parseInt(isoDateOnly[1], 10),
+            parseInt(isoDateOnly[2], 10),
+            parseInt(isoDateOnly[3], 10)
+        );
+    }
+
     const parts = s.split(/[\/\-\.]/).map((x) => parseInt(x, 10));
     if (parts.length >= 3 && !parts.some((n) => Number.isNaN(n))) {
         return dateKeyFromParts(parts[0], parts[1], parts[2]);
@@ -218,6 +241,8 @@ function renderCalendar(data) {
         grid.appendChild(el);
     }
 
+    const todayKey = getTodayDateKey();
+
     for (let d = 1; d <= daysInMonth; d++) {
         const el = document.createElement('div');
         const key = dateKeyFromParts(y, m + 1, d);
@@ -234,6 +259,7 @@ function renderCalendar(data) {
         el.innerHTML = `<span class="cal-day-num">${d}</span>${marksHtml}`;
 
         if (parts.length) el.classList.add('cal-day-minimum');
+        if (key === todayKey) el.classList.add('cal-day-today');
         grid.appendChild(el);
     }
 }

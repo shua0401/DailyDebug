@@ -109,12 +109,20 @@ function migrateScoreToV3(sheet) {
   sheet.autoResizeColumns(1, NEW_HEADERS.length);
 }
 
+/** スプレッドシートの Date 型は JSON で ISO(UTC) になり、クライアントで前日扱いになるため文字列化 */
+function formatDateCellForApi(v) {
+  if (v instanceof Date) {
+    return Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy/M/d');
+  }
+  return v;
+}
+
 function rowToJson(row) {
   if (row[0] === '' || row[0] == null) return null;
 
   if (row.length >= 11) {
     return {
-      date: row[0],
+      date: formatDateCellForApi(row[0]),
       backlog_it: row[1] != null ? String(row[1]) : '',
       backlog_en: row[2] != null ? String(row[2]) : '',
       backlog_training: row[3] != null ? String(row[3]) : '',
@@ -132,7 +140,7 @@ function rowToJson(row) {
     var min = cellToBool(row[4]);
     var bonus = cellToBool(row[5]);
     return {
-      date: row[0],
+      date: formatDateCellForApi(row[0]),
       backlog_it: row[1] != null ? String(row[1]) : '',
       backlog_en: row[2] != null ? String(row[2]) : '',
       backlog_training: row[3] != null ? String(row[3]) : '',
@@ -148,7 +156,7 @@ function rowToJson(row) {
 
   if (row.length >= 4) {
     return {
-      date: row[0],
+      date: formatDateCellForApi(row[0]),
       backlog_it: row[2] || '',
       backlog_en: '',
       backlog_training: '',
