@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Daily Debug Phase 02</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="overlay"></div>
+
+    <nav class="menu-container">
+        <div class="hamburger" onclick="toggleMenu()">
+            <span></span><span></span><span></span>
+        </div>
+        <div id="side-menu" class="side-menu">
+            <a href="#" onclick="showPage('top')">TOP (INPUT)</a>
+            <a href="#" onclick="showPage('history')">HISTORY (LOG)</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section id="page-top">
+            <header>
+                <h1 class="glitch-text">ACTION: PHASE 02</h1>
+                <p class="subtitle">AI Coach Integrated</p>
+            </header>
+            <div class="glass-card">
+                <div class="form-group backlog-block">
+                    <label>バックログ — IT</label>
+                    <textarea id="backlog_it" placeholder="IT 関連のメモ..." rows="3"></textarea>
+                    <div class="category-circles" aria-label="IT の達成マーク">
+                        <div class="circle-pair">
+                            <span class="circle-sub">最低限</span>
+                            <button type="button" class="circle-toggle" id="circle_it_min" aria-pressed="false" aria-label="IT 最低限" onclick="toggleMark('it','min')"></button>
+                        </div>
+                        <div class="circle-pair">
+                            <span class="circle-sub">ボーナス</span>
+                            <button type="button" class="circle-toggle" id="circle_it_bonus" aria-pressed="false" aria-label="IT ボーナス" onclick="toggleMark('it','bonus')"></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group backlog-block">
+                    <label>バックログ — 英語</label>
+                    <textarea id="backlog_en" placeholder="英語学習のメモ..." rows="3"></textarea>
+                    <div class="category-circles" aria-label="英語 の達成マーク">
+                        <div class="circle-pair">
+                            <span class="circle-sub">最低限</span>
+                            <button type="button" class="circle-toggle" id="circle_en_min" aria-pressed="false" aria-label="英語 最低限" onclick="toggleMark('en','min')"></button>
+                        </div>
+                        <div class="circle-pair">
+                            <span class="circle-sub">ボーナス</span>
+                            <button type="button" class="circle-toggle" id="circle_en_bonus" aria-pressed="false" aria-label="英語 ボーナス" onclick="toggleMark('en','bonus')"></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group backlog-block">
+                    <label>バックログ — 筋トレ</label>
+                    <textarea id="backlog_training" placeholder="トレーニングのメモ..." rows="3"></textarea>
+                    <div class="category-circles" aria-label="筋トレ の達成マーク">
+                        <div class="circle-pair">
+                            <span class="circle-sub">最低限</span>
+                            <button type="button" class="circle-toggle" id="circle_training_min" aria-pressed="false" aria-label="筋トレ 最低限" onclick="toggleMark('training','min')"></button>
+                        </div>
+                        <div class="circle-pair">
+                            <span class="circle-sub">ボーナス</span>
+                            <button type="button" class="circle-toggle" id="circle_training_bonus" aria-pressed="false" aria-label="筋トレ ボーナス" onclick="toggleMark('training','bonus')"></button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-save" id="saveBtn" onclick="saveLog()">SEND TO CLOUD</button>
+            </div>
+
+            <div class="glass-card calendar-card">
+                <div class="calendar-toolbar">
+                    <button type="button" class="btn-cal-nav" onclick="shiftCalendarMonth(-1)" aria-label="前の月">◀</button>
+                    <h2 class="calendar-title" id="calendarMonthLabel"></h2>
+                    <button type="button" class="btn-cal-nav" onclick="shiftCalendarMonth(1)" aria-label="次の月">▶</button>
+                </div>
+                <div class="calendar-weekdays" aria-hidden="true">
+                    <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+                <div class="calendar-legend calendar-legend-rows">
+                    <p><span class="cal-dot-legend cal-dot-it">●</span> IT 最低限</p>
+                    <p><span class="cal-dot-legend cal-dot-en">●</span> 英語 最低限</p>
+                    <p><span class="cal-dot-legend cal-dot-training">●</span> 筋トレ 最低限</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-history" style="display: none;">
+            <h2 class="history-title">DEBUG HISTORY</h2>
+            <div id="history-list"></div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "daily-debug",
+  "version": "1.0.0",
+  "description": "10秒日記アプリ - Googleスプレッドシート連携",
+  "main": "index.html",
+  "scripts": {
+    "start": "open index.html"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "keywords": [
+    "diary",
+    "spreadsheet",
+    "pwa",
+    "google-apps-script"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+
+
+
