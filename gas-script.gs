@@ -109,12 +109,19 @@ function migrateScoreToV3(sheet) {
   sheet.autoResizeColumns(1, NEW_HEADERS.length);
 }
 
-/** スプレッドシートの Date 型は JSON で ISO(UTC) になり、クライアントで前日扱いになるため文字列化 */
+/** 日付列: スクリプトのタイムゾーン設定に依存させず日本の暦日に統一 */
 function formatDateCellForApi(v) {
   if (v instanceof Date) {
-    return Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy/M/d');
+    return Utilities.formatDate(v, 'Asia/Tokyo', 'yyyy/M/d');
   }
   return v;
+}
+
+function formatTimestampCellForApi(v) {
+  if (v instanceof Date) {
+    return Utilities.formatDate(v, 'Asia/Tokyo', 'yyyy/MM/dd HH:mm:ss');
+  }
+  return v != null ? String(v) : '';
 }
 
 function rowToJson(row) {
@@ -132,7 +139,7 @@ function rowToJson(row) {
       bonus_en: cellToBool(row[7]),
       min_training: cellToBool(row[8]),
       bonus_training: cellToBool(row[9]),
-      timestamp: row[10]
+      timestamp: formatTimestampCellForApi(row[10])
     };
   }
 
@@ -150,7 +157,7 @@ function rowToJson(row) {
       bonus_en: bonus,
       min_training: min,
       bonus_training: bonus,
-      timestamp: row[6]
+      timestamp: formatTimestampCellForApi(row[6])
     };
   }
 
@@ -166,7 +173,7 @@ function rowToJson(row) {
       bonus_en: false,
       min_training: false,
       bonus_training: false,
-      timestamp: row[3]
+      timestamp: formatTimestampCellForApi(row[3])
     };
   }
 

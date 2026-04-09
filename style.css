@@ -268,7 +268,7 @@ textarea:focus {
     position: relative;
 }
 
-.cal-day-minimum {
+.cal-day-has-marks {
     border-color: rgba(0, 212, 255, 0.55);
     background: rgba(0, 212, 255, 0.08);
 }
@@ -301,6 +301,11 @@ textarea:focus {
     text-shadow: 0 0 6px currentColor;
 }
 
+.cal-mark-bonus {
+    font-size: 0.88rem;
+    opacity: 0.95;
+}
+
 .cal-dot-it {
     color: #00d4ff;
 }
@@ -326,6 +331,11 @@ textarea:focus {
 
 .cal-dot-legend {
     margin-right: 6px;
+}
+
+.cal-legend-sub {
+    font-size: 0.72rem;
+    opacity: 0.9;
 }
 
 .history-marks {
@@ -359,6 +369,17 @@ textarea:focus {
     font-weight: bold;
     font-size: 1rem;
     margin-bottom: 12px;
+}
+
+.history-day {
+    display: block;
+}
+
+.history-ts {
+    font-weight: normal;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.55);
+    margin-top: 6px;
 }
 
 .history-field {

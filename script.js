@@ -119,8 +119,10 @@ function normalizeEntry(item) {
     const bonus_training =
         item.bonus_training !== undefined ? truthyFlag(item.bonus_training) : legacyBonus;
 
+    const dateCanon = normalizeDateKey(item.date);
+
     return {
-        date: item.date,
+        date: dateCanon || (item.date != null ? String(item.date).trim() : ''),
         backlog_it: item.backlog_it ?? item.note ?? '',
         backlog_en: item.backlog_en ?? '',
         backlog_training: item.backlog_training ?? '',
@@ -176,23 +178,25 @@ function normalizeDateKey(dateVal) {
     }
     const s = String(dateVal).trim();
 
-    // GAS 等が Date を JSON 化したときは "2026-04-06T15:00:00.000Z" のようになり、
-    // 日付部分だけ切り出すとタイムゾーンずれで前日になる。必ずローカル日付に変換する。
-    if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+    // 日時付き ISO（…T…Z 等）は必ずローカル暦日に変換（履歴の UTC 文字列ずれ対策）
+    const isFullIsoDatetime =
+        /[Tt]\d/.test(s) ||
+        /Z$/i.test(s.trim()) ||
+        /[+-]\d{2}:?\d{2}$/.test(s);
+    if (/^\d{4}-\d{2}-\d{2}/.test(s) && isFullIsoDatetime) {
         const dt = new Date(s);
         if (!Number.isNaN(dt.getTime())) {
             return dateKeyFromParts(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
         }
     }
 
-    // 時刻なしの YYYY-MM-DD はカレンダーの日付そのものとして扱う（UTC 解釈でずれないように）
-    const head = s.split('T')[0];
-    const isoDateOnly = head.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (isoDateOnly) {
+    // 時刻なし YYYY-MM-DD のみ（全体が日付だけ）はその数値を暦日として採用
+    if (/^(\d{4})-(\d{2})-(\d{2})$/.test(s)) {
+        const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
         return dateKeyFromParts(
-            parseInt(isoDateOnly[1], 10),
-            parseInt(isoDateOnly[2], 10),
-            parseInt(isoDateOnly[3], 10)
+            parseInt(m[1], 10),
+            parseInt(m[2], 10),
+            parseInt(m[3], 10)
         );
     }
 
@@ -203,26 +207,64 @@ function normalizeDateKey(dateVal) {
     return s;
 }
 
-/** @returns {{ it: Set<string>, en: Set<string>, training: Set<string> }} */
-function buildMinimumSetsByCategory(data) {
-    const out = {
-        it: new Set(),
-        en: new Set(),
-        training: new Set()
-    };
+/** 履歴・表示用（正規化済み yyyy/m/d） */
+function formatHistoryDate(dateVal) {
+    const k = normalizeDateKey(dateVal);
+    return k || String(dateVal ?? '');
+}
+
+/** タイムスタンプ行（ISO もローカルで表示） */
+function formatHistoryTimestamp(ts) {
+    if (ts == null || ts === '') return '';
+    const s = String(ts).trim();
+    if (/[Tt]\d/.test(s) || /Z$/i.test(s)) {
+        const dt = new Date(s);
+        if (!Number.isNaN(dt.getTime())) {
+            return dt.toLocaleString('ja-JP', {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+    }
+    return s;
+}
+
+/** @returns {{ min: Record<string, Set<string>>, bonus: Record<string, Set<string>> }} */
+function buildCategoryMarkSets(data) {
+    const min = { it: new Set(), en: new Set(), training: new Set() };
+    const bonus = { it: new Set(), en: new Set(), training: new Set() };
     data.forEach((item) => {
         const key = normalizeDateKey(item.date);
         if (!key) return;
-        if (item.min_it) out.it.add(key);
-        if (item.min_en) out.en.add(key);
-        if (item.min_training) out.training.add(key);
+        if (item.min_it) min.it.add(key);
+        if (item.bonus_it) bonus.it.add(key);
+        if (item.min_en) min.en.add(key);
+        if (item.bonus_en) bonus.en.add(key);
+        if (item.min_training) min.training.add(key);
+        if (item.bonus_training) bonus.training.add(key);
     });
-    return out;
+    return { min, bonus };
+}
+
+function appendCalMarksForDay(parts, key, setsMin, setsBonus, cat, dotClass, tMin, tBon) {
+    const hasMin = setsMin[cat].has(key);
+    const hasBon = setsBonus[cat].has(key);
+    if (hasMin) {
+        parts.push(`<span class="cal-mark cal-dot-${dotClass}" title="${tMin}">●</span>`);
+    } else if (hasBon) {
+        parts.push(
+            `<span class="cal-mark cal-mark-bonus cal-dot-${dotClass}" title="${tBon}">○</span>`
+        );
+    }
 }
 
 function renderCalendar(data) {
     const list = Array.isArray(data) ? data : [];
-    const sets = buildMinimumSetsByCategory(list);
+    const { min: setsMin, bonus: setsBonus } = buildCategoryMarkSets(list);
     const y = calendarViewDate.getFullYear();
     const m = calendarViewDate.getMonth();
 
@@ -249,16 +291,42 @@ function renderCalendar(data) {
         el.className = 'cal-cell cal-day';
 
         const parts = [];
-        if (sets.it.has(key)) parts.push('<span class="cal-mark cal-dot-it" title="IT 最低限">●</span>');
-        if (sets.en.has(key)) parts.push('<span class="cal-mark cal-dot-en" title="英語 最低限">●</span>');
-        if (sets.training.has(key))
-            parts.push('<span class="cal-mark cal-dot-training" title="筋トレ 最低限">●</span>');
+        appendCalMarksForDay(
+            parts,
+            key,
+            setsMin,
+            setsBonus,
+            'it',
+            'it',
+            'IT 最低限',
+            'IT ボーナス'
+        );
+        appendCalMarksForDay(
+            parts,
+            key,
+            setsMin,
+            setsBonus,
+            'en',
+            'en',
+            '英語 最低限',
+            '英語 ボーナス'
+        );
+        appendCalMarksForDay(
+            parts,
+            key,
+            setsMin,
+            setsBonus,
+            'training',
+            'training',
+            '筋トレ 最低限',
+            '筋トレ ボーナス'
+        );
 
         const marksHtml =
             parts.length > 0 ? `<span class="cal-marks-row">${parts.join('')}</span>` : '';
         el.innerHTML = `<span class="cal-day-num">${d}</span>${marksHtml}`;
 
-        if (parts.length) el.classList.add('cal-day-minimum');
+        if (parts.length) el.classList.add('cal-day-has-marks');
         if (key === todayKey) el.classList.add('cal-day-today');
         grid.appendChild(el);
     }
@@ -303,7 +371,7 @@ function renderHistoryList(data) {
         const card = document.createElement('div');
         card.className = 'glass-card history-card';
         card.innerHTML = `
-            <div class="history-date">${escapeHtml(String(item.date))}<br><span class="history-marks">${escapeHtml(markSummaryHtml(item))}</span></div>
+            <div class="history-date"><span class="history-day">${escapeHtml(formatHistoryDate(item.date))}</span>${item.timestamp ? `<div class="history-ts">${escapeHtml(formatHistoryTimestamp(item.timestamp))}</div>` : ''}<div class="history-marks">${escapeHtml(markSummaryHtml(item))}</div></div>
             <div class="history-field"><span class="hf-label">IT</span> ${escapeHtml(item.backlog_it || '—')}</div>
             <div class="history-field"><span class="hf-label">英語</span> ${escapeHtml(item.backlog_en || '—')}</div>
             <div class="history-field"><span class="hf-label">筋トレ</span> ${escapeHtml(item.backlog_training || '—')}</div>

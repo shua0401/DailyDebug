@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daily-debug-v7';
+const CACHE_NAME = 'daily-debug-v8';
 const urlsToCache = [
   './',
   './index.html',
